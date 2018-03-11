@@ -7,7 +7,7 @@ using static CMDID3Tagger.Constants;
 
 namespace CMDID3Tagger.Commands
 {
-    public class CommandFromFileName : CommandBase
+    public sealed class CommandFromFileName : CommandBase
     {
         private const string COMMAND_STRING = "fromfilename";
 
@@ -20,6 +20,8 @@ namespace CMDID3Tagger.Commands
         {
             if (ArgsParser.Parse(args) == Args.PathAndString)
                 ChangeTags(args[0], args[1]);
+            else
+                throw new ArgumentException();
         }
 
         private static void ChangeTags(string path, string pattern)
@@ -65,6 +67,12 @@ namespace CMDID3Tagger.Commands
             try
             {
                 tagLibFile = TagLib.File.Create(path);
+
+                if (tagLibFile.Properties.MediaTypes != MediaTypes.Audio)
+                {
+                    Console.WriteLine($"'{path}' is not audio! Skipping it...");
+                    return;
+                }
             }
             catch (Exception)
             {

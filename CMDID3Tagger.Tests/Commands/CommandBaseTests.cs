@@ -7,7 +7,8 @@ namespace CMDID3Tagger.Tests.Commands
     public class CommandBaseTests
     {
         [TestCase("fromfilename")]
-        public void GetCommandTest(string commandString)
+        [TestCase("fromtags")]
+        public void GetCommand(string commandString)
         {
             CommandBase command = CommandBase.GetCommand(commandString);
             Assert.AreEqual(commandString, command.CommandString);

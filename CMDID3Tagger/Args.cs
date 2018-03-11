@@ -2,6 +2,7 @@
 {
     internal enum Args
     {
-        PathAndString
+        PathAndString,
+        PathAndStringAndPath
     }
 }
