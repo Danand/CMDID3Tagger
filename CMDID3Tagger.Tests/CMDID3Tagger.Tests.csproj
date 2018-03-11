@@ -55,6 +55,7 @@
   <ItemGroup>
     <Compile Include="Commands\CommandBaseTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TaggerTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -64,6 +65,9 @@
       <Project>{06249F54-A134-46A8-8664-F5BAEB7E61EE}</Project>
       <Name>CMDID3Tagger</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Data\sample.mp3" />
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
