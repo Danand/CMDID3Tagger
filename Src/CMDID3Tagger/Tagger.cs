@@ -6,7 +6,7 @@ namespace CMDID3Tagger
     /// <summary>
     /// Tag command wrapper.
     /// </summary>
-    public class Tagger
+    public static class Tagger
     {
         /// <summary>
         /// Chooses and runs suitable command from given arguments.
