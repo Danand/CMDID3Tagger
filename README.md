@@ -5,7 +5,7 @@ ID3 command-line tagger for Windows.
 ### Renaming files to tags
 Before:
 ```console
-//d/Downloads/
+/d/Downloads/
 ├── 003_STAY BY ME.mp3
 ├── 01.真夜中のドア／stay with me (1980).mp3
 ├── 02. Plastic Love (100% City Pop).mp3
@@ -15,12 +15,12 @@ Before:
 └── 大橋純子 - クリスタル・シティー.mp3
 ```
 Run utility:
-```cmd
-cmdtagger fromtags "D:\\Downloads" "%artist%/%year% - %album%/%track% - %title%"
+```batch
+cmdtagger fromtags "D:\Downloads" "%artist%/%year% - %album%/%track% - %title%"
 ```
 After:
 ```console
-//d/Downloads/
+/d/Downloads/
 ├── 八神純子
 │   └── 1983 - FULL MOON
 │       └── 9 - FULL MOON.mp3
@@ -42,7 +42,29 @@ After:
 ```
 
 ### Renaming files to tags
-Coming soon.
+Before (without ID3 tags):
+```console
+/d/Downloads/
+├── AKB48 - #好きなんだ.mp3
+├── Aqours - WATER BLUE NEW WORLD.mp3
+├── Guilty Kiss - コワレヤスキ.mp3
+├── Tokyo 7th シスターズ - SEVENTH HAVEN.mp3
+└── μ's - 僕らは今のなかで.mp3
+```
+Run utility:
+```batch
+cmdtagger fromfilename "D:\Downloads" "%artist% - %title%"
+```
+
+Result:
+
+| File | Artist | Title |
+| --- | --- | --- |
+| AKB48 - #好きなんだ.mp3 | AKB48 | #好きなんだ |
+| Aqours - WATER BLUE NEW WORLD.mp3 | Aqours | WATER BLUE NEW WORLD |
+| Guilty Kiss - コワレヤスキ.mp3 | Guilty Kiss | コワレヤスキ |
+| Tokyo 7th シスターズ - SEVENTH HAVEN.mp3 | Tokyo 7th シスターズ | SEVENTH HAVEN |
+| μ's - 僕らは今のなかで.mp3 | μ's | 僕らは今のなかで |
 
 ## Downloads
-Coming soon.
+*Coming soon.*
