@@ -8,6 +8,8 @@ namespace CMDID3Tagger.Tests
     [TestFixture]
     public class TaggerTests
     {
+        private const string SAMPLE_FOLDER = "TestSamples";
+
         [TestCase(
             "fromtags",
             "sample.mp3",
@@ -32,7 +34,12 @@ namespace CMDID3Tagger.Tests
             var applicationDirectory = Path.GetDirectoryName(new Uri(GetType().Assembly.CodeBase).LocalPath);
             var projectPath = Directory.GetParent(applicationDirectory).Parent.FullName;
             var samplePath = Path.Combine(projectPath, "Data\\", fileName);
-            var sampleCopyPath = $"{applicationDirectory}\\{fileName}";
+            var sampleDirectory = $"{applicationDirectory}\\{SAMPLE_FOLDER}";
+            var sampleCopyPath = $"{sampleDirectory}\\{fileName}";
+            var expectedFilePath = $"{sampleDirectory}\\{expectedResultPath}";
+
+            if (!Directory.Exists(sampleDirectory))
+                Directory.CreateDirectory(sampleDirectory);
 
             if (File.Exists(sampleCopyPath))
                 File.Delete(sampleCopyPath);
@@ -41,21 +48,11 @@ namespace CMDID3Tagger.Tests
 
             Tagger.Start(new [] { command, sampleCopyPath, pattern });
 
-            var expectedFilePath = $"{applicationDirectory}\\{expectedResultPath}";
-            var expectedFileExists = File.Exists(expectedFilePath);
+            var createdFilePath = Directory.GetFiles(sampleDirectory, "*.*", SearchOption.AllDirectories).FirstOrDefault();
 
-            var expectedTopDirectory = Directory.GetDirectories(applicationDirectory).FirstOrDefault(dir => dir.EndsWith(expectedResultPath.Split('\\').First()));
+            Directory.Delete($"{sampleDirectory}", true);
 
-            if (expectedTopDirectory != null)
-            {
-                Directory.Delete(expectedTopDirectory, true);
-            }
-            else if (expectedFileExists)
-            {
-                File.Delete(expectedFilePath);
-            }
-
-            Assert.IsTrue(expectedFileExists);
+            Assert.AreEqual(expectedFilePath, createdFilePath);
         }
 
         [TestCase(
@@ -77,30 +74,25 @@ namespace CMDID3Tagger.Tests
             var applicationDirectory = Path.GetDirectoryName(new Uri(GetType().Assembly.CodeBase).LocalPath);
             var projectPath = Directory.GetParent(applicationDirectory).Parent.FullName;
             var samplePath = Path.Combine(projectPath, "Data\\", sampleFileName);
-            var sampleCopyPath = $"{applicationDirectory}\\{sampleFileName}";
+            var sampleDirectory = $"{applicationDirectory}\\{SAMPLE_FOLDER}";
+            var sampleCopyPath = $"{sampleDirectory}\\{sampleFileName}";
+            var expectedFilePath = $"{sampleDirectory}\\{expectedResultPath}";
+
+            if (!Directory.Exists(sampleDirectory))
+                Directory.CreateDirectory(sampleDirectory);
 
             if (File.Exists(sampleCopyPath))
                 File.Delete(sampleCopyPath);
 
             File.Copy(samplePath, sampleCopyPath);
 
-            Tagger.Start(new [] { command, applicationDirectory, pattern });
+            Tagger.Start(new [] { command, sampleDirectory, pattern });
 
-            var expectedFilePath = $"{applicationDirectory}\\{expectedResultPath}";
-            var expectedFileExists = File.Exists(expectedFilePath);
+            var createdFilePath = Directory.GetFiles(sampleDirectory, "*.*", SearchOption.AllDirectories).FirstOrDefault();
 
-            var expectedTopDirectory = Directory.GetDirectories(applicationDirectory).FirstOrDefault(dir => dir.EndsWith(expectedResultPath.Split('\\').First()));
+            Directory.Delete($"{sampleDirectory}", true);
 
-            if (expectedTopDirectory != null)
-            {
-                Directory.Delete(expectedTopDirectory, true);
-            }
-            else if (expectedFileExists)
-            {
-                File.Delete(expectedFilePath);
-            }
-
-            Assert.IsTrue(expectedFileExists);
+            Assert.AreEqual(expectedFilePath, createdFilePath);
         }
     }
 }

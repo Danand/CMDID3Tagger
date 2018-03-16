@@ -3,7 +3,8 @@ using System.IO;
 using System.Text.RegularExpressions;
 using TagLib;
 
-using static CMDID3Tagger.Constants;
+using File = System.IO.File;
+using TagLibFile = TagLib.File;
 
 namespace CMDID3Tagger.Commands
 {
@@ -50,7 +51,7 @@ namespace CMDID3Tagger.Commands
         {
             var tagPlaceholdersMatches = Regex.Matches(pattern, "(%([^%]*)%)");
 
-            if (!System.IO.File.Exists(path))
+            if (!File.Exists(path))
             {
                 Console.WriteLine($"File '{path}' doesn't exist! Check it and try again.");
                 return;
@@ -62,11 +63,11 @@ namespace CMDID3Tagger.Commands
                 return;
             }
 
-            TagLib.File tagLibFile;
+            TagLibFile tagLibFile;
 
             try
             {
-                tagLibFile = TagLib.File.Create(path);
+                tagLibFile = TagLibFile.Create(path);
 
                 if (tagLibFile.Properties.MediaTypes != MediaTypes.Audio)
                 {
@@ -102,7 +103,7 @@ namespace CMDID3Tagger.Commands
                 {
                     var tagName = placeholderMatch.Groups[2].Value;
 
-                    AssignTag(
+                    TagPropertyWrapper.AssignTag(
                         tagLibFile: tagLibFile,
                         name:       tagName,
                         value:      tagMatch.Groups[tagName].Value);
@@ -114,50 +115,11 @@ namespace CMDID3Tagger.Commands
 
         private static void RemoveAllTags(string path)
         {
-            using (var tagLibFile = TagLib.File.Create(path))
+            using (var tagLibFile = TagLibFile.Create(path))
             {
                 tagLibFile.RemoveTags(TagTypes.AllTags);
                 tagLibFile.Save();
             }
-        }
-
-        private static void AssignTag(TagLib.File tagLibFile, string name, string value)
-        {
-            // Tag names are case-insensitive:
-            name = name.ToLower();
-
-            switch (name)
-            {
-                case TRACK_KEY:
-                    tagLibFile.Tag.Track = uint.Parse(value);
-                    break;
-
-                case ARTIST_KEY:
-                    tagLibFile.Tag.Performers = new[] { value };
-                    break;
-
-                case ALBUM_ARTIST_KEY:
-                    tagLibFile.Tag.AlbumArtists = new[] { value };
-                    break;
-
-                case TITLE_KEY:
-                    tagLibFile.Tag.Title = value;
-                    break;
-
-                case ALBUM_KEY:
-                    tagLibFile.Tag.Album = value;
-                    break;
-
-                case YEAR_KEY:
-                    tagLibFile.Tag.Year = uint.Parse(value);
-                    break;
-
-                default:
-                    Console.WriteLine($"Unrecognized tag '{name}' with value '{value}'!");
-                    break;
-            }
-
-            Console.WriteLine($"'{value}' {name} tag added to '{tagLibFile.Name}'.");
         }
     }
 }

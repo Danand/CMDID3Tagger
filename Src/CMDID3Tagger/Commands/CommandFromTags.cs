@@ -1,10 +1,10 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using System.Text.RegularExpressions;
 using TagLib;
-using static CMDID3Tagger.Constants;
+
 using File = System.IO.File;
+using TagLibFile = TagLib.File;
 
 namespace CMDID3Tagger.Commands
 {
@@ -78,11 +78,11 @@ namespace CMDID3Tagger.Commands
                 return;
             }
 
-            TagLib.File tagLibFile;
+            TagLibFile tagLibFile;
 
             try
             {
-                tagLibFile = TagLib.File.Create(path);
+                tagLibFile = TagLibFile.Create(path);
 
                 if (tagLibFile.Properties.MediaTypes != MediaTypes.Audio)
                 {
@@ -104,7 +104,7 @@ namespace CMDID3Tagger.Commands
                 {
                     var tagValuePlaceholder = placeholderMatch.Groups[1].Value;
                     var tagName = placeholderMatch.Groups[2].Value;
-                    var tagValue = GetTagValue(tagLibFile, tagName) ?? string.Empty;
+                    var tagValue = TagPropertyWrapper.GetTagValue(tagLibFile, tagName);
 
                     tagValue = FilePath.ReplaceInvalidFileNameChars(tagValue, "-");
 
@@ -126,34 +126,6 @@ namespace CMDID3Tagger.Commands
                 File.Delete(newFilePath);
 
             File.Move(path, newFilePath);
-        }
-
-        private static string GetTagValue(TagLib.File tagLibFile, string name)
-        {
-            switch (name)
-            {
-                case TRACK_KEY:
-                    return tagLibFile.Tag.Track.ToString();
-
-                case ARTIST_KEY:
-                    return tagLibFile.Tag.Performers.FirstOrDefault();
-
-                case ALBUM_ARTIST_KEY:
-                    return tagLibFile.Tag.AlbumArtists.FirstOrDefault();
-
-                case TITLE_KEY:
-                    return tagLibFile.Tag.Title;
-
-                case ALBUM_KEY:
-                    return tagLibFile.Tag.Album;
-
-                case YEAR_KEY:
-                    return tagLibFile.Tag.Year.ToString();
-
-                default:
-                    Console.WriteLine($"Unrecognized tag '{name}'!");
-                    return string.Empty;
-            }
         }
     }
 }

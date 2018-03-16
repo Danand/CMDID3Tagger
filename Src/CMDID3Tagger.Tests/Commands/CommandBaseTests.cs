@@ -11,7 +11,7 @@ namespace CMDID3Tagger.Tests.Commands
         public void GetCommand(string commandString)
         {
             CommandBase command = CommandBase.GetCommand(commandString);
-            Assert.AreEqual(commandString, command.CommandString);
+            Assert.AreEqual(command.CommandString, commandString);
         }
     }
 }

@@ -41,7 +41,7 @@ After:
         └── 2 - Plastic Love.mp3
 ```
 
-### Renaming files to tags
+### Getting tags from file names
 Before (without ID3 tags):
 ```console
 /d/Downloads/
