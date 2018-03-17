@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using CMDID3Tagger.Commands;
 
 namespace CMDID3Tagger
@@ -14,6 +15,12 @@ namespace CMDID3Tagger
         /// <param name="args">Command iteself and it's arguments.</param>
         public static void Start(string[] args)
         {
+            if (!args.Any())
+            {
+                Console.WriteLine("No arguments passed!");
+                return;
+            }
+
             // Commands are case-insensitive:
             string commandString = args[0].ToLower(); 
 

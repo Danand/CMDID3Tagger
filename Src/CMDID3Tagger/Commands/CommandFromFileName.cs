@@ -8,7 +8,7 @@ using TagLibFile = TagLib.File;
 
 namespace CMDID3Tagger.Commands
 {
-    public sealed class CommandFromFileName : CommandBase
+    internal sealed class CommandFromFileName : CommandBase
     {
         private const string COMMAND_STRING = "fromfilename";
 

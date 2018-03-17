@@ -4,8 +4,14 @@ using System.Linq;
 
 namespace CMDID3Tagger.Commands
 {
+    /// <summary>
+    /// Command base class. Provides getting exact command.
+    /// </summary>
     public abstract class CommandBase
     {
+        /// <summary>
+        /// Command string representation expected from command-line.
+        /// </summary>
         public abstract string CommandString { get; }
 
         /// <summary>
