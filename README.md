@@ -1,5 +1,5 @@
 # CMD ID3 tagger
-ID3 command-line tagger for Windows.
+ID3 command-line tagger for Windows. Simple [taglib-sharp](https://github.com/mono/taglib-sharp) wrapper.
 
 ## Examples
 ### Renaming files to tags
@@ -67,4 +67,4 @@ Result:
 | μ's - 僕らは今のなかで.mp3 | μ's | 僕らは今のなかで |
 
 ## Downloads
-*Coming soon.*
+[Latest](https://github.com/Danand/CMDID3Tagger/releases/download/0.2.1/CMDID3Tagger_v0.2.1.zip).
