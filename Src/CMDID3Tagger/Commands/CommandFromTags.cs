@@ -1,6 +1,10 @@
 ﻿using System;
 using System.IO;
 using System.Text.RegularExpressions;
+
+using CMDID3Tagger.Interfaces;
+using CMDID3Tagger.Utils;
+
 using TagLib;
 
 using File = System.IO.File;
@@ -8,26 +12,26 @@ using TagLibFile = TagLib.File;
 
 namespace CMDID3Tagger.Commands
 {
-    internal sealed class CommandFromTags : CommandBase
+    public sealed class CommandFromTags : ICommand
     {
-        private const string COMMAND_STRING = "fromtags";
+        private readonly ITagPropertyEditor tagPropertyEditor;
 
-        public override string CommandString
+        public CommandFromTags(ITagPropertyEditor tagPropertyEditor)
         {
-            get { return COMMAND_STRING; }
+            this.tagPropertyEditor = tagPropertyEditor;
         }
 
-        public override void Execute(string[] args)
+        void ICommand.Execute(params string[] args)
         {
-            if (ArgsParser.Parse(args) == Args.PathAndStringAndPath)
+            if (args.Length == 3)
                 RenameFiles(args[0], args[1], args[2]);
-            else if (ArgsParser.Parse(args) == Args.PathAndString)
+            else if (args.Length == 2)
                 RenameFiles(args[0], args[1]);
             else
                 throw new ArgumentException();
         }
 
-        private static void RenameFiles(string path, string pattern)
+        private void RenameFiles(string path, string pattern)
         {
             var resultDirectory
                 = File.GetAttributes(path).HasFlag(FileAttributes.Directory)
@@ -40,7 +44,7 @@ namespace CMDID3Tagger.Commands
                 RenameFilesInDirectory(path, pattern, resultDirectory);
         }
 
-        private static void RenameFiles(string path, string pattern, string resultDirectory)
+        private void RenameFiles(string path, string pattern, string resultDirectory)
         {
             if (File.GetAttributes(path).HasFlag(FileAttributes.Directory))
                 RenameFilesInDirectory(path, pattern, resultDirectory);
@@ -48,13 +52,10 @@ namespace CMDID3Tagger.Commands
                 RenameFile(path, pattern, resultDirectory);
         }
 
-        private static void RenameFilesInDirectory(string path, string pattern, string resultDirectory)
+        private void RenameFilesInDirectory(string path, string pattern, string resultDirectory)
         {
             if (!Directory.Exists(path))
-            {
-                Console.WriteLine($"Directory '{path}' doesn't exist! Check it and try again.");
-                return;
-            }
+                throw new Exception($"Directory '{path}' doesn't exist!");
 
             var trackPaths = Directory.GetFiles(path);
 
@@ -62,21 +63,15 @@ namespace CMDID3Tagger.Commands
                 RenameFile(trackPath, pattern, resultDirectory);
         }
 
-        private static void RenameFile(string path, string pattern, string resultDirectory)
+        private void RenameFile(string path, string pattern, string resultDirectory)
         {
             var tagPlaceholdersMatches = Regex.Matches(pattern, "(%([^%]*)%)");
 
             if (!File.Exists(path))
-            {
-                Console.WriteLine($"File '{path}' doesn't exist! Check it and try again.");
-                return;
-            }
+                throw new Exception($"File '{path}' doesn't exist!");
 
             if (tagPlaceholdersMatches.Count == 0)
-            {
-                Console.WriteLine($"Invalid pattern '{pattern}'! Check it and try again.");
-                return;
-            }
+                throw new Exception($"Invalid pattern '{pattern}'!");
 
             TagLibFile tagLibFile;
 
@@ -85,15 +80,12 @@ namespace CMDID3Tagger.Commands
                 tagLibFile = TagLibFile.Create(path);
 
                 if (tagLibFile.Properties.MediaTypes != MediaTypes.Audio)
-                {
-                    Console.WriteLine($"'{path}' is not audio! Skipping it...");
-                    return;
-                }
+                    throw new Exception($"'{path}' is not audio! Skipping it...");
+
             }
-            catch (Exception)
+            catch (Exception exception)
             {
-                Console.WriteLine($"{nameof(TagLib.File)} for '{path}' doesn't created!");
-                return;
+                throw new Exception($"{nameof(TagLib.File)} for '{path}' doesn't created!", exception);
             }
 
             var newFileName = pattern;
@@ -104,7 +96,7 @@ namespace CMDID3Tagger.Commands
                 {
                     var tagValuePlaceholder = placeholderMatch.Groups[1].Value;
                     var tagName = placeholderMatch.Groups[2].Value;
-                    var tagValue = TagPropertyWrapper.GetTagValue(tagLibFile, tagName);
+                    var tagValue = tagPropertyEditor.GetTagValue(tagLibFile, tagName);
 
                     tagValue = FilePath.ReplaceInvalidFileNameChars(tagValue, "-");
 

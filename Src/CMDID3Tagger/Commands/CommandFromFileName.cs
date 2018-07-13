@@ -1,6 +1,9 @@
 ﻿using System;
 using System.IO;
 using System.Text.RegularExpressions;
+
+using CMDID3Tagger.Interfaces;
+
 using TagLib;
 
 using File = System.IO.File;
@@ -8,24 +11,24 @@ using TagLibFile = TagLib.File;
 
 namespace CMDID3Tagger.Commands
 {
-    internal sealed class CommandFromFileName : CommandBase
+    public sealed class CommandFromFileName : ICommand
     {
-        private const string COMMAND_STRING = "fromfilename";
+        private readonly ITagPropertyEditor tagPropertyEditor;
 
-        public override string CommandString
+        public CommandFromFileName(ITagPropertyEditor tagPropertyEditor)
         {
-            get { return COMMAND_STRING; }
+            this.tagPropertyEditor = tagPropertyEditor;
         }
 
-        public override void Execute(string[] args)
+        void ICommand.Execute(params string[] args)
         {
-            if (ArgsParser.Parse(args) == Args.PathAndString)
+            if (args.Length == 2)
                 ChangeTags(args[0], args[1]);
             else
                 throw new ArgumentException();
         }
 
-        private static void ChangeTags(string path, string pattern)
+        private void ChangeTags(string path, string pattern)
         {
             if (Path.HasExtension(path))
                 ChangeTagsInFile(path, pattern);
@@ -33,13 +36,10 @@ namespace CMDID3Tagger.Commands
                 ChangeTagsInDirectory(path, pattern);
         }
 
-        private static void ChangeTagsInDirectory(string path, string pattern)
+        private void ChangeTagsInDirectory(string path, string pattern)
         {
             if (!Directory.Exists(path))
-            {
-                Console.WriteLine($"Directory '{path}' doesn't exist! Check it and try again.");
-                return;
-            }
+                throw new Exception($"Directory '{path}' doesn't exist! Check it and try again.");
 
             var trackPaths = Directory.GetFiles(path);
 
@@ -47,21 +47,15 @@ namespace CMDID3Tagger.Commands
                 ChangeTagsInFile(trackPath, pattern);
         }
 
-        private static void ChangeTagsInFile(string path, string pattern)
+        private void ChangeTagsInFile(string path, string pattern)
         {
             var tagPlaceholdersMatches = Regex.Matches(pattern, "(%([^%]*)%)");
 
             if (!File.Exists(path))
-            {
-                Console.WriteLine($"File '{path}' doesn't exist! Check it and try again.");
-                return;
-            }
+                throw new Exception($"File '{path}' doesn't exist!");
 
             if (tagPlaceholdersMatches.Count == 0)
-            {
-                Console.WriteLine($"Invalid pattern '{pattern}'! Check it and try again.");
-                return;
-            }
+                throw new Exception($"Invalid pattern '{pattern}'!");
 
             TagLibFile tagLibFile;
 
@@ -70,15 +64,11 @@ namespace CMDID3Tagger.Commands
                 tagLibFile = TagLibFile.Create(path);
 
                 if (tagLibFile.Properties.MediaTypes != MediaTypes.Audio)
-                {
-                    Console.WriteLine($"'{path}' is not audio! Skipping it...");
-                    return;
-                }
+                    throw new Exception($"'{path}' is not audio! Skipping it...");
             }
-            catch (Exception)
+            catch (Exception exception)
             {
-                Console.WriteLine($"{nameof(TagLib.File)} for '{path}' doesn't created!");
-                return;
+                throw new Exception($"{nameof(TagLib.File)} for '{path}' doesn't created!", exception);
             }
 
             RemoveAllTags(path);
@@ -103,7 +93,7 @@ namespace CMDID3Tagger.Commands
                 {
                     var tagName = placeholderMatch.Groups[2].Value;
 
-                    TagPropertyWrapper.AssignTag(
+                    tagPropertyEditor.AssignTag(
                         tagLibFile: tagLibFile,
                         name:       tagName,
                         value:      tagMatch.Groups[tagName].Value);
@@ -113,7 +103,7 @@ namespace CMDID3Tagger.Commands
             }
         }
 
-        private static void RemoveAllTags(string path)
+        private void RemoveAllTags(string path)
         {
             using (var tagLibFile = TagLibFile.Create(path))
             {

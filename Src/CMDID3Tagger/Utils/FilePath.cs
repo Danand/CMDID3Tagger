@@ -1,9 +1,9 @@
 ﻿using System.IO;
 
-namespace CMDID3Tagger
+namespace CMDID3Tagger.Utils
 {
     /// <summary>
-    /// Static class for working with paths.
+    /// Static util for working with paths.
     /// </summary>
     public static class FilePath
     {

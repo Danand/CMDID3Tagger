@@ -1,14 +1,23 @@
-﻿using System;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Linq;
 using System.Reflection;
+
+using CMDID3Tagger.Interfaces;
+
 using TagLib;
 
 namespace CMDID3Tagger
 {
-    internal static class TagPropertyWrapper
+    public class TagPropertyEditor : ITagPropertyEditor
     {
-        public static void AssignTag(File tagLibFile, string name, string value)
+        private readonly IOutput output;
+
+        public TagPropertyEditor(IOutput output)
+        {
+            this.output = output;
+        }
+
+        void ITagPropertyEditor.AssignTag(File tagLibFile, string name, string value)
         {
             name = FixTagName(name);
 
@@ -17,7 +26,7 @@ namespace CMDID3Tagger
 
             if (propertyInfo == default(PropertyInfo))
             {
-                Console.WriteLine($"Unrecognized tag '{name}' with value '{value}'!");
+                output.Write($"Unrecognized tag '{name}' with value '{value}'!");
                 return;
             }
 
@@ -30,10 +39,10 @@ namespace CMDID3Tagger
             else if (propertyInfo.PropertyType == typeof(string[]))
                 propertyInfo.SetValue(tag, new[] { value });
 
-            Console.WriteLine($"'{value}' {name} tag added to '{tagLibFile.Name}'.");
+            output.Write($"'{value}' {name} tag added to '{tagLibFile.Name}'.");
         }
 
-        public static string GetTagValue(File tagLibFile, string name)
+        string ITagPropertyEditor.GetTagValue(File tagLibFile, string name)
         {
             name = FixTagName(name);
 
@@ -43,7 +52,7 @@ namespace CMDID3Tagger
 
             if (propertyInfo == default(PropertyInfo))
             {
-                Console.WriteLine($"Unrecognized tag '{name}'!");
+                output.Write($"Unrecognized tag '{name}'!");
                 return string.Empty;
             }
 
@@ -58,12 +67,12 @@ namespace CMDID3Tagger
             if (value is string[] valueArray)
                 return valueArray.FirstOrDefault() ?? string.Empty;
 
-            Console.WriteLine($"Unrecognized tag '{name}'!");
+            output.Write($"Unrecognized tag '{name}'!");
 
             return string.Empty;
         }
 
-        private static PropertyInfo GetTagProperty(Tag tag, string name)
+        private PropertyInfo GetTagProperty(Tag tag, string name)
         {
             return tag
                 .GetType()
@@ -72,7 +81,7 @@ namespace CMDID3Tagger
                                             property.Name.ToLowerInvariant() == name);
         }
 
-        private static string FixTagName(string name)
+        private string FixTagName(string name)
         {
             switch (name)
             {
